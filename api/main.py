@@ -19,6 +19,7 @@ origins = [
     "http://localhost:8000",
 ]
 
+
 # Give an Id to every request and response set
 @server.middleware("http")
 async def add_request_id(request: Request, call_next):
@@ -27,27 +28,31 @@ async def add_request_id(request: Request, call_next):
     response.headers["X-Request-Id"] = request_id
     return response
 
-@server.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"message": exc.detail},
-    )
-
-
-@server.exception_handler(ValueError)
-async def value_error_handler(request: Request, exc: ValueError):
-    return JSONResponse(
-        status_code=400,
-        content={"message": "Invalid input value", "detail": str(exc)},
-    )
-
 
 @server.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception):
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    Global handler for all exceptions.
+    Returns a structured JSON error response.
+    """
     return JSONResponse(
         status_code=500,
-        content={"message": "Internal Server Error", "detail": str(exc)},
+        content={
+            "message": "An unexpected error occurred",
+            "error": str(exc),
+            "path": str(request.url),
+        },
+    )
+
+
+@server.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """
+    Handles HTTPException with custom message sent from router.
+    """
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"message": exc.detail, "path": str(request.url)},
     )
 
 
@@ -61,6 +66,7 @@ server.add_middleware(
 )
 
 server.include_router(mask_pdf_router)
+
 
 @server.middleware("http")
 async def catch_exceptions_middleware(request: Request, call_next):
