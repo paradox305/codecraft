@@ -1,5 +1,5 @@
 import io
-from core.utilis.logger import logger
+from core.utils.logger import logger
 from core.models.ollama import OllamaClient
 
 

@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 from api.routers.mask_pdf import router as mask_pdf_router
+from api.routers.healthcare import router as healthcare_router
 
 server = FastAPI(
     title="FastAPI",
@@ -66,6 +67,7 @@ server.add_middleware(
 )
 
 server.include_router(mask_pdf_router)
+server.include_router(healthcare_router)
 
 
 @server.middleware("http")
