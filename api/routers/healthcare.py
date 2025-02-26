@@ -17,3 +17,12 @@ async def upload_report(file: UploadFile):
         return {"message": "Report uploaded successfully", "report": report}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
+    
+
+@router.get("/search")
+async def search(query: str):
+    try:
+        result = await healthcare_service.search_agent(query)
+        return {"message": "Search successful", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching: {str(e)}")
