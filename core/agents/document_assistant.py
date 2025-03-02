@@ -2,19 +2,14 @@ from core.utils.extractors.pdf_extractor import PdfExtractor
 from core.utils.vectorstores.weaviate import WeaviateVectorStore
 from core.utils.chunkers import Chunker
 from langchain.prompts import PromptTemplate
-from core.models.ollama import OllamaClient
-
+from core.models.client import LLM
 
 class DocumentAssistant:
     def __init__(self):
         self.pdf_extractor = PdfExtractor()
         self.vector_store = WeaviateVectorStore()
         self.chunker = Chunker()
-        self.llm_client = OllamaClient(
-            model_name="llama3.2",
-            gpu_server="http://localhost:11434",
-            kwargs={"temperature": 0, "cache": False},
-        ).get_client()
+        self.llm_client = LLM("openai").get_client("gpt-4o-mini")
 
     def knowledge_creation_agent(self, pdf_file, index_name):
         # Extract text from PDF

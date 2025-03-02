@@ -1,7 +1,6 @@
 import io
 from core.utils.logger import logger
-from core.models.ollama import OllamaClient
-
+from core.models.client import LLM
 
 class MaskPdf:
     def __init__(self):
@@ -16,11 +15,7 @@ class MaskPdf:
         self.convert_from_bytes = convert_from_bytes
         self.np = np
         self.Image = Image
-        self.llm_client = OllamaClient(
-            model_name="llama3.2",
-            gpu_server="http://localhost:11434",
-            kwargs={"temperature": 0.7, "cache": False},
-        ).get_client()
+        self.llm_client = LLM('openai').get_client("gpt-4o-mini")
 
     def mask_words(self, words, prompt):
         try:
@@ -36,8 +31,8 @@ class MaskPdf:
             # Check if "true" appears in the response (case insensitive)
             if "true" in response.content.lower():
                 logger.info(
-                    f"Text to be masked: {words} , LLM Response: {response.content}"
-                )
+                        f"Text to be masked: {words} , LLM Response: {response.content}"
+                        )
                 return True
             else:
                 return False
@@ -59,8 +54,8 @@ class MaskPdf:
                 # Perform OCR to detect words
                 h, w, _ = img_cv.shape
                 data = self.pytesseract.image_to_data(
-                    img_gray, output_type=self.pytesseract.Output.DICT
-                )
+                        img_gray, output_type=self.pytesseract.Output.DICT
+                        )
                 # Create a context of next and previous words with a rolling window of 8 words
                 statement = ""
                 for i, word in enumerate(data["text"]):
@@ -73,19 +68,19 @@ class MaskPdf:
                         statement = " ".join(words + [" "] * 7)
                     if self.mask_words(words=statement, prompt=prompt):
                         x, y, w, h = (
-                            data["left"][i],
-                            data["top"][i],
-                            data["width"][i],
-                            data["height"][i],
-                        )
+                                data["left"][i],
+                                data["top"][i],
+                                data["width"][i],
+                                data["height"][i],
+                                )
                         self.cv2.rectangle(
-                            img_cv, (x, y), (x + w, y + h), (0, 0, 0), -1
-                        )  # Black box mask
+                                img_cv, (x, y), (x + w, y + h), (0, 0, 0), -1
+                                )  # Black box mask
                 masked_images.append(self.Image.fromarray(img_cv))
             # Creater a new PDF with masked images and return the whole pdf with first page
             masked_images[0].save(
-                output_pdf, "PDF", save_all=True, append_images=masked_images[1:]
-            )
+                    output_pdf, "PDF", save_all=True, append_images=masked_images[1:]
+                    )
             output_pdf.seek(0)
             logger.info("PDF masked successfully")
             return output_pdf

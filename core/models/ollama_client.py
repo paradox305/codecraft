@@ -1,6 +1,3 @@
-# Class handles ollama models
-
-
 class OllamaClient:
     def __init__(self, model_name, gpu_server, **kwargs):
         from langchain_ollama import ChatOllama
