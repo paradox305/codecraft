@@ -1,25 +1,6 @@
 # Use the provided base image with Python 3.13 on Bookworm
-FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    tesseract-ocr \
-    gcc \
-    poppler-utils \
-    libsndfile1 \
-    ffmpeg \
-    libgl1 \
-    libportaudio2 \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    portaudio19-dev \
-    libssl-dev \
-    libffi-dev \
-    python3-dev \
-    libsndfile1-dev \
-    pkg-config \
-    && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables to disable .pyc file creation and enable stdout/stderr logging
 ENV PYTHONDONTWRITEBYTECODE=1
