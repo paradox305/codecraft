@@ -7,7 +7,7 @@ from core.utils.logger import logger
 
 class WeaviateVectorStore:
     def __init__(self):
-        self.client = weaviate.connect_to_local(host=get_env_variable("WEAVIATE_HOST"))
+        self.client = weaviate.connect_to_local(host=get_env_variable("WEAVIATE_HOST"),port=get_env_variable("WEAVIATE_PORT"))
         self.embeddings = Embeddings().huggingface_embeddings
 
     def add_documents_to_vector_store(self, index_name, documents, **kwargs):
