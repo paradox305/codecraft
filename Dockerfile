@@ -11,8 +11,6 @@ WORKDIR /app
 # Copy dependency files
 COPY pyproject.toml /app/
 
-
-
 # Final sync/install after copying application code
 ENV PATH="/app/.venv/bin:$PATH"
 RUN uv pip install -r pyproject.toml --no-cache-dir --system
