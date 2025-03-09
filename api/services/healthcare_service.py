@@ -1,5 +1,6 @@
 from datetime import datetime
 from core.agents.document_assistant import DocumentAssistant
+from core.utils.vectorstores.weaviate import WeaviateVectorStore
 from core.utils.logger import logger
 
 
@@ -11,7 +12,8 @@ class HealthCareService:
         # Call the knowledge creation agent
         file_buffer = await pdf_file.read()
         # Generate unique index name
-        index_name = f"health_bot_{pdf_file.filename}_time_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        index_name = WeaviateVectorStore.generate_unique_weaviate_index(pdf_file.filename)
+
         text = self.document_assistant.knowledge_creation_agent(
             file_buffer, index_name=index_name
         )
