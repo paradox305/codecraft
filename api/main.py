@@ -1,12 +1,13 @@
 # Create a fastapi project
 import uvicorn
+from api.utils.rate_limiter import limiter
+from slowapi.middleware import SlowAPIMiddleware
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 from api.routers.mask_pdf import router as mask_pdf_router
 from api.routers.healthcare import router as healthcare_router
-
 server = FastAPI(
     title="FastAPI",
     description="FastAPI",
@@ -21,6 +22,9 @@ origins = [
     "http://129.146.35.254:3000"
 ]
 
+# Configure Rate Limiter (10 requests per minute per IP)
+server.state.limiter = limiter
+server.add_middleware(SlowAPIMiddleware)
 
 # Give an Id to every request and response set
 @server.middleware("http")
@@ -30,6 +34,9 @@ async def add_request_id(request: Request, call_next):
     response.headers["X-Request-Id"] = request_id
     return response
 
+@server.exception_handler(429)
+async def rate_limit_exceeded(request: Request, exc):
+    return JSONResponse(status_code=429, content={"error": "Too many requests, slow down!"})
 
 @server.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):

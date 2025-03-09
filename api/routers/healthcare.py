@@ -1,5 +1,5 @@
 # Heathcare Assistant API
-
+from api.utils.rate_limiter import limiter
 from fastapi import APIRouter, HTTPException, UploadFile
 from api.services.healthcare_service import HealthCareService
 
@@ -15,6 +15,7 @@ healthcare_service = HealthCareService()
 
 # Router to upload a PDF report
 @router.post("/upload-report")
+@limiter.limit("10/minute")
 async def upload_report(file: UploadFile):
     try:
         report = await healthcare_service.upload_report(file)
@@ -24,6 +25,7 @@ async def upload_report(file: UploadFile):
 
 
 @router.get("/search")
+@limiter.limit("10/minute")
 async def search(query: str, index_name: str):
     try:
         result = await healthcare_service.search_agent(query, index_name=index_name)
