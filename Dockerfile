@@ -1,54 +1,31 @@
-# Use the provided base image with Python 3.13 on Bookworm
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+# -------------------------------
+# Base stage
+# -------------------------------
+FROM python:3.13-bookworm AS base
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    tesseract-ocr \
-    gcc \
-    poppler-utils \
-    libsndfile1 \
-    ffmpeg \
-    libgl1 \
-    libportaudio2 \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    portaudio19-dev \
-    libssl-dev \
-    libffi-dev \
-    python3-dev \
-    libsndfile1-dev \
-    pkg-config \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt update && apt install ffmpeg libsm6 libxext6 -y
 
-# Set environment variables to disable .pyc file creation and enable stdout/stderr logging
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV UV_SYSTEM_PYTHON=1
-ENV UV_COMPILE_BYTECODE=1
-ENV UV_LINK_MODE=copy
-ENV UV_HTTP_TIMEOUT=520
-ENV BLIS_ARCH=generic
-# Set the working directory
+# Copy uv
+COPY --from=ghcr.io/astral-sh/uv:0.4.9 /uv /bin/uv
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
 WORKDIR /app
 
-# Copy only dependency-related files first for better caching
-COPY pyproject.toml uv.lock README* ./
-# Install dependencies *without* installing the project yet
-# --frozen means it respects your pinned versions (if you have a lockfile)
-RUN pip install --no-cache-dir wheel setuptools
-RUN uv lock
-RUN uv sync 
+# Copy dependency files
+COPY pyproject.toml /app/
 
-# Copy the rest of the application code
-COPY core/ ./core/
-COPY api/ ./api/
-# Install dependencies using the frozen lockfile
 
-# Expose port 80 for the FastAPI application
+# Copy your application code
+COPY api/ /app/api
+COPY core /app/core
+
+# Final sync/install after copying application code
+ENV PATH="/app/.venv/bin:$PATH"
+RUN uv pip install -r pyproject.toml --no-cache-dir --system
+
+# Make sure the .venv is on PATH
+
 EXPOSE 80
 
-# Run the FastAPI application using uvicorn (ensure main:app is available)
-ENTRYPOINT ["fastapi", "dev","api/main.py", "--host", "0.0.0.0", "--port", "80"]
-
+# Use uvicorn to serve FastAPI on port 80
+ENTRYPOINT ["fastapi", "run", "api/main.py", "--host", "0.0.0.0", "--port", "80"]
