@@ -12,15 +12,14 @@ WORKDIR /app
 COPY pyproject.toml /app/
 
 
-# Copy your application code
-COPY api/ /app/api
-COPY core /app/core
 
 # Final sync/install after copying application code
 ENV PATH="/app/.venv/bin:$PATH"
 RUN uv pip install -r pyproject.toml --no-cache-dir --system
 
-# Make sure the .venv is on PATH
+# Copy your application code
+COPY api/ /app/api
+COPY core /app/core
 
 EXPOSE 80
 
