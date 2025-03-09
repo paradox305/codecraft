@@ -1,7 +1,4 @@
-# -------------------------------
-# Base stage
-# -------------------------------
-FROM python:3.13-bookworm AS base
+FROM python:3.10-bookworm 
 
 RUN apt update && apt install ffmpeg libsm6 libxext6 -y
 
@@ -28,4 +25,4 @@ RUN uv pip install -r pyproject.toml --no-cache-dir --system
 EXPOSE 80
 
 # Use uvicorn to serve FastAPI on port 80
-ENTRYPOINT ["fastapi", "run", "api/main.py", "--host", "0.0.0.0", "--port", "80"]
+CMD ["fastapi", "run", "api/main.py", "--host", "0.0.0.0", "--port", "80"]
