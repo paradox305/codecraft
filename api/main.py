@@ -18,6 +18,7 @@ server = FastAPI(
 origins = [
     "http://localhost:3000",
     "http://localhost:8000",
+    "http://129.146.35.254:3000"
 ]
 
 
